@@ -1,10 +1,10 @@
-# 🥗 Food Waste Connector
+#  Food Waste Connector
 
 A web platform that connects surplus food donors with NGOs to reduce food waste and feed people in need.
 
 ---
 
-## 🚀 Quick Setup
+## Simple Quick Setup
 
 ### 1. Install Python dependencies
 
@@ -27,7 +27,7 @@ http://localhost:5000
 
 ---
 
-## 👤 Default Admin Login
+##  Default Admin Login(MINE)
 
 | Email | Password |
 |-------|----------|
@@ -35,7 +35,7 @@ http://localhost:5000
 
 ---
 
-## 🏗️ Project Structure
+##  Project Structure(overall flow of a website)
 
 ```
 food-waste-connector/
@@ -61,7 +61,7 @@ food-waste-connector/
 
 ---
 
-## 👥 User Roles
+##  User Roles
 
 ### Donor
 - Register and list surplus food with full details
@@ -85,7 +85,7 @@ food-waste-connector/
 
 ---
 
-## ✨ Features
+##  Features
 
 | Feature | Status |
 |---------|--------|
@@ -106,7 +106,7 @@ food-waste-connector/
 
 ---
 
-## 🔧 Extending the Project
+##  Extending the Project (what i will extend in future ) 
 
 ### Add email notifications
 Install `flask-mail` and configure SMTP in `app.py`. Send emails on request acceptance.
@@ -124,15 +124,15 @@ Build a React Native or Flutter app that consumes the `/api/donations` JSON endp
 
 ---
 
-## 🌱 Technology Stack
+##  Technology Stack
 
 | Layer | Technology |
 |-------|-----------|
 | Backend | Python 3 + Flask |
-| Database | SQLite (via SQLAlchemy ORM) |
+| Database | SQLite |
 | Frontend | HTML5 + CSS3 + Vanilla JS |
-| Fonts | Sora + DM Sans (Google Fonts) |
-| Auth | Werkzeug password hashing + Flask sessions |
+| Fonts | Sora + DM Sans  |
+
 
 ---
 
