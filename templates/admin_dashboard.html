@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% block title %}Admin Panel – FoodConnect{% endblock %}
+{% block content %}
+<section class="dashboard-section">
+  <div class="dashboard-container">
+
+    <div class="dashboard-header">
+      <div>
+        <h1 class="dashboard-title">Admin Panel 🛡️</h1>
+        <p class="dashboard-sub">Manage users, verify NGOs, monitor donations</p>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-grid stats-grid-wide">
+      <div class="stat-card stat-blue">
+        <div class="stat-card-num">{{ stats.donors }}</div>
+        <div class="stat-card-label">Donors</div>
+      </div>
+      <div class="stat-card stat-green">
+        <div class="stat-card-num">{{ stats.verified_ngos }}/{{ stats.ngos }}</div>
+        <div class="stat-card-label">NGOs (Verified)</div>
+      </div>
+      <div class="stat-card stat-teal">
+        <div class="stat-card-num">{{ stats.total_donations }}</div>
+        <div class="stat-card-label">Total Listings</div>
+      </div>
+      <div class="stat-card stat-orange">
+        <div class="stat-card-num">{{ stats.available }}</div>
+        <div class="stat-card-label">Available Now</div>
+      </div>
+      <div class="stat-card stat-purple">
+        <div class="stat-card-num">{{ stats.completed }}</div>
+        <div class="stat-card-label">Completed</div>
+      </div>
+      <div class="stat-card stat-gray">
+        <div class="stat-card-num">{{ stats.total_requests }}</div>
+        <div class="stat-card-label">Total Requests</div>
+      </div>
+    </div>
+
+    <!-- PENDING NGOs -->
+    {% if pending_ngos %}
+    <div class="dashboard-block">
+      <h2 class="block-title">⏳ NGOs Awaiting Verification <span class="badge badge-orange">{{ pending_ngos|length }}</span></h2>
+      <div class="requests-list">
+        {% for ngo in pending_ngos %}
+        <div class="request-card urgent">
+          <div class="request-info">
+            <div class="request-ngo">{{ ngo.org_name or ngo.name }}</div>
+            <div class="request-meta">📧 {{ ngo.email }} · 📞 {{ ngo.phone }}</div>
+            <div class="request-meta">📍 {{ ngo.address or 'No address provided' }}</div>
+            <div class="request-date">Registered: {{ ngo.created_at.strftime('%d %b %Y') }}</div>
+          </div>
+          <div class="request-actions">
+            <a href="{{ url_for('verify_ngo', user_id=ngo.id) }}" class="btn btn-success btn-sm">✓ Verify NGO</a>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- TABS -->
+    <div class="admin-tabs">
+      <button class="tab-btn active" onclick="showTab('users')">👥 All Users</button>
+      <button class="tab-btn" onclick="showTab('donations')">🍛 Donations</button>
+      <button class="tab-btn" onclick="showTab('requests')">📋 Requests</button>
+    </div>
+
+    <!-- USERS TAB -->
+    <div class="tab-panel active" id="tab-users">
+      <div class="donations-table-wrap">
+        <table class="donations-table">
+          <thead>
+            <tr><th>Name</th><th>Email</th><th>Role</th><th>Org</th><th>Status</th><th>Actions</th></tr>
+          </thead>
+          <tbody>
+          {% for u in users %}
+          <tr>
+            <td>{{ u.name }}</td>
+            <td class="td-email">{{ u.email }}</td>
+            <td><span class="badge badge-{{ u.role }}">{{ u.role|title }}</span></td>
+            <td>{{ u.org_name or '—' }}</td>
+            <td>
+              {% if u.role == 'ngo' %}
+                <span class="badge {{ 'badge-green' if u.is_verified else 'badge-orange' }}">
+                  {{ 'Verified' if u.is_verified else 'Pending' }}
+                </span>
+              {% endif %}
+              <span class="badge {{ 'badge-active' if u.is_active else 'badge-suspended' }}">
+                {{ 'Active' if u.is_active else 'Suspended' }}
+              </span>
+            </td>
+            <td class="action-cell">
+              {% if u.role == 'ngo' and not u.is_verified %}
+                <a href="{{ url_for('verify_ngo', user_id=u.id) }}" class="btn btn-xs btn-success">Verify</a>
+              {% endif %}
+              <a href="{{ url_for('toggle_user', user_id=u.id) }}" class="btn btn-xs btn-warning">
+                {{ 'Suspend' if u.is_active else 'Activate' }}
+              </a>
+              <a href="{{ url_for('delete_user', user_id=u.id) }}" class="btn btn-xs btn-danger"
+                 onclick="return confirm('Delete user {{ u.name }}?')">Del</a>
+            </td>
+          </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- DONATIONS TAB -->
+    <div class="tab-panel" id="tab-donations">
+      <div class="donations-table-wrap">
+        <table class="donations-table">
+          <thead>
+            <tr><th>Food</th><th>Donor</th><th>Qty</th><th>Serves</th><th>Expiry</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+          {% for d in donations %}
+          <tr>
+            <td>{{ d.food_name }}</td>
+            <td>{{ d.donor.org_name or d.donor.name }}</td>
+            <td>{{ d.quantity }}</td>
+            <td>{{ d.serves_people }}</td>
+            <td>{{ d.expiry_time.strftime('%d %b %H:%M') }}</td>
+            <td><span class="status-badge status-{{ d.status }}">{{ d.status|title }}</span></td>
+          </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- REQUESTS TAB -->
+    <div class="tab-panel" id="tab-requests">
+      <div class="donations-table-wrap">
+        <table class="donations-table">
+          <thead>
+            <tr><th>Food</th><th>NGO</th><th>Donor</th><th>Requested</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+          {% for r in requests %}
+          <tr>
+            <td>{{ r.donation.food_name }}</td>
+            <td>{{ r.ngo.org_name or r.ngo.name }}</td>
+            <td>{{ r.donation.donor.org_name or r.donation.donor.name }}</td>
+            <td>{{ r.requested_at.strftime('%d %b %H:%M') }}</td>
+            <td><span class="status-badge status-{{ r.status }}">{{ r.status|title }}</span></td>
+          </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<script>
+function showTab(id) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+</script>
+{% endblock %}

@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block title %}Donor Dashboard – FoodConnect{% endblock %}
+{% block content %}
+<section class="dashboard-section">
+  <div class="dashboard-container">
+
+    <div class="dashboard-header">
+      <div>
+        <h1 class="dashboard-title">Welcome, {{ user.name }} 👋</h1>
+        <p class="dashboard-sub">{{ user.org_name or 'Individual Donor' }} · {{ user.address or 'Location not set' }}</p>
+      </div>
+      <a href="{{ url_for('add_food') }}" class="btn btn-primary btn-lg">+ List New Food</a>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-grid">
+      <div class="stat-card stat-blue">
+        <div class="stat-card-num">{{ stats.total }}</div>
+        <div class="stat-card-label">Total Listings</div>
+      </div>
+      <div class="stat-card stat-green">
+        <div class="stat-card-num">{{ stats.available }}</div>
+        <div class="stat-card-label">Currently Available</div>
+      </div>
+      <div class="stat-card stat-orange">
+        <div class="stat-card-num">{{ stats.pending_req }}</div>
+        <div class="stat-card-label">Pending Requests</div>
+      </div>
+      <div class="stat-card stat-teal">
+        <div class="stat-card-num">{{ stats.completed }}</div>
+        <div class="stat-card-label">Completed</div>
+      </div>
+    </div>
+
+    <!-- PENDING REQUESTS -->
+    {% if pending_requests %}
+    <div class="dashboard-block">
+      <h2 class="block-title">🔔 Pending NGO Requests <span class="badge badge-orange">{{ pending_requests|length }}</span></h2>
+      <div class="requests-list">
+        {% for req in pending_requests %}
+        <div class="request-card urgent">
+          <div class="request-info">
+            <div class="request-ngo">{{ req.ngo.org_name or req.ngo.name }}</div>
+            <div class="request-food">For: <strong>{{ req.donation.food_name }}</strong> · {{ req.donation.quantity }}</div>
+            {% if req.message %}<div class="request-msg">"{{ req.message }}"</div>{% endif %}
+            <div class="request-meta">📞 {{ req.ngo.phone }} · Requested {{ req.requested_at.strftime('%d %b, %I:%M %p') }}</div>
+          </div>
+          <div class="request-actions">
+            <a href="{{ url_for('accept_request', req_id=req.id) }}" class="btn btn-success btn-sm">✓ Accept</a>
+            <a href="{{ url_for('reject_request', req_id=req.id) }}" class="btn btn-danger btn-sm">✗ Reject</a>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- MY DONATIONS -->
+    <div class="dashboard-block">
+      <h2 class="block-title">📋 My Food Listings</h2>
+      {% if donations %}
+      <div class="donations-table-wrap">
+        <table class="donations-table">
+          <thead>
+            <tr>
+              <th>Food</th>
+              <th>Qty / Serves</th>
+              <th>Type</th>
+              <th>Expiry</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for d in donations %}
+          <tr class="{{ 'row-expired' if d.status == 'expired' else '' }}">
+            <td>
+              <div class="td-food-name">{{ d.food_name }}</div>
+              <div class="td-food-addr">📍 {{ d.pickup_address[:40] }}{% if d.pickup_address|length > 40 %}…{% endif %}</div>
+            </td>
+            <td>
+              <div>{{ d.quantity }}</div>
+              <div class="td-serves">👥 {{ d.serves_people }} people</div>
+            </td>
+            <td>
+              <span class="badge {{ 'badge-veg' if d.food_type == 'veg' else 'badge-nonveg' }}">
+                {{ '🟢 Veg' if d.food_type == 'veg' else '🔴 Non-Veg' }}
+              </span>
+            </td>
+            <td>
+              <div>{{ d.expiry_time.strftime('%d %b') }}</div>
+              <div class="td-time">{{ d.expiry_time.strftime('%I:%M %p') }}</div>
+              {% if d.status == 'available' %}
+                {% set mins = ((d.expiry_time - now).total_seconds() / 60)|int %}
+                {% if mins < 120 %}
+                  <div class="expiry-warn">⚠️ Expiring soon!</div>
+                {% endif %}
+              {% endif %}
+            </td>
+            <td>
+              <span class="status-badge status-{{ d.status }}">{{ d.status|title }}</span>
+            </td>
+            <td class="action-cell">
+              {% if d.status == 'requested' %}
+                <a href="{{ url_for('complete_donation', don_id=d.id) }}" class="btn btn-xs btn-success">Mark Delivered</a>
+              {% endif %}
+              {% if d.status in ['available', 'expired'] %}
+                <a href="{{ url_for('delete_donation', don_id=d.id) }}" class="btn btn-xs btn-danger"
+                   onclick="return confirm('Remove this listing?')">Delete</a>
+              {% endif %}
+              {% if d.status == 'available' %}
+                {% set reqs = d.requests|selectattr('status', 'eq', 'pending')|list %}
+                {% if reqs %}<span class="badge badge-orange">{{ reqs|length }} req</span>{% endif %}
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="empty-state">
+        <div class="empty-icon">🍽️</div>
+        <p>You haven't listed any food yet.</p>
+        <a href="{{ url_for('add_food') }}" class="btn btn-primary">List Your First Donation</a>
+      </div>
+      {% endif %}
+    </div>
+
+  </div>
+</section>
+{% endblock %}

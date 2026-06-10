@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}Register – FoodConnect{% endblock %}
+{% block content %}
+<section class="auth-section">
+  <div class="auth-container">
+    <div class="auth-header">
+      <div class="auth-icon">🥗</div>
+      <h1 class="auth-title">Create your account</h1>
+      <p class="auth-sub">Join FoodConnect and help reduce food waste</p>
+    </div>
+
+    <form class="auth-form" method="POST" action="{{ url_for('register') }}">
+      <div class="role-selector">
+        <div class="role-option" onclick="selectRole('donor')">
+          <input type="radio" name="role" value="donor" id="role_donor" required>
+          <label for="role_donor">
+            <span class="role-icon">🍽️</span>
+            <span class="role-name">I'm a Donor</span>
+            <span class="role-desc">I have surplus food to share</span>
+          </label>
+        </div>
+        <div class="role-option" onclick="selectRole('ngo')">
+          <input type="radio" name="role" value="ngo" id="role_ngo">
+          <label for="role_ngo">
+            <span class="role-icon">🏥</span>
+            <span class="role-name">I'm an NGO</span>
+            <span class="role-desc">We distribute food to those in need</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Full Name *</label>
+          <input type="text" name="name" class="form-input" placeholder="Your name" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone *</label>
+          <input type="tel" name="phone" class="form-input" placeholder="+91 XXXXX XXXXX" required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Email Address *</label>
+        <input type="email" name="email" class="form-input" placeholder="you@example.com" required>
+      </div>
+
+      <div class="form-group" id="org-field">
+        <label class="form-label">Organization Name</label>
+        <input type="text" name="org_name" class="form-input" placeholder="Hotel / Restaurant / NGO name">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Address</label>
+        <input type="text" name="address" class="form-input" placeholder="City, Area">
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Password *</label>
+          <input type="password" name="password" id="password" class="form-input" placeholder="Min 6 characters" required minlength="6">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Confirm Password *</label>
+          <input type="password" name="confirm_password" id="confirm_password" class="form-input" placeholder="Repeat password" required>
+        </div>
+      </div>
+
+      <div class="ngo-note" id="ngo-note" style="display:none;">
+        <span class="note-icon">ℹ️</span>
+        NGO accounts require admin verification before you can request food. You'll be notified once verified.
+      </div>
+
+      <button type="submit" class="btn btn-auth">Create Account</button>
+    </form>
+
+    <p class="auth-switch">Already have an account? <a href="{{ url_for('login') }}">Login here</a></p>
+  </div>
+</section>
+
+<script>
+function selectRole(role) {
+  document.querySelectorAll('.role-option').forEach(el => el.classList.remove('selected'));
+  document.getElementById('role_' + role).checked = true;
+  event.currentTarget.classList.add('selected');
+  document.getElementById('ngo-note').style.display = role === 'ngo' ? 'flex' : 'none';
+}
+// Pre-select from URL
+const params = new URLSearchParams(window.location.search);
+if (params.get('role')) {
+  const r = params.get('role');
+  document.getElementById('role_' + r) && selectRole(r);
+  document.querySelectorAll('.role-option').forEach(el => {
+    if(el.querySelector('input[value="'+r+'"]')) el.classList.add('selected');
+  });
+  if(r === 'ngo') document.getElementById('ngo-note').style.display = 'flex';
+}
+// Password match
+document.querySelector('.auth-form').addEventListener('submit', function(e) {
+  const p = document.getElementById('password').value;
+  const c = document.getElementById('confirm_password').value;
+  if (p !== c) { e.preventDefault(); alert('Passwords do not match.'); }
+});
+</script>
+{% endblock %}

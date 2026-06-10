@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Login – FoodConnect{% endblock %}
+{% block content %}
+<section class="auth-section">
+  <div class="auth-container auth-container-sm">
+    <div class="auth-header">
+      <div class="auth-icon">🔐</div>
+      <h1 class="auth-title">Welcome back</h1>
+      <p class="auth-sub">Login to your FoodConnect account</p>
+    </div>
+
+    <form class="auth-form" method="POST" action="{{ url_for('login') }}">
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input type="email" name="email" class="form-input" placeholder="you@example.com" required autofocus>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" name="password" class="form-input" placeholder="Your password" required>
+      </div>
+      <button type="submit" class="btn btn-auth">Login</button>
+    </form>
+
+    <div class="demo-creds">
+      <div class="demo-label">Demo Credentials</div>
+      <div class="demo-row"><span class="demo-role">Admin:</span> admin@foodconnector.org / admin123</div>
+    </div>
+
+    <p class="auth-switch">Don't have an account? <a href="{{ url_for('register') }}">Register here</a></p>
+  </div>
+</section>
+{% endblock %}

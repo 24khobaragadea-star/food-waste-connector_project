@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}List Food – FoodConnect{% endblock %}
+{% block content %}
+<section class="form-section">
+  <div class="form-container">
+    <div class="form-page-header">
+      <a href="{{ url_for('donor_dashboard') }}" class="back-link">← Back to Dashboard</a>
+      <h1 class="form-page-title">List Surplus Food</h1>
+      <p class="form-page-sub">Fill in the details below. NGOs will see this and can request pickup.</p>
+    </div>
+
+    <form class="main-form" method="POST" action="{{ url_for('add_food') }}">
+
+      <div class="form-section-block">
+        <h3 class="form-section-label">🍛 Food Details</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Food Name *</label>
+            <input type="text" name="food_name" class="form-input" placeholder="e.g. Biryani, Dal-Roti, Sweets" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Food Type *</label>
+            <select name="food_type" class="form-input" required>
+              <option value="">Select type</option>
+              <option value="veg">🟢 Vegetarian</option>
+              <option value="non-veg">🔴 Non-Vegetarian</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Quantity *</label>
+            <input type="text" name="quantity" class="form-input" placeholder="e.g. 15 kg, 50 packets" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Approx. People it Serves</label>
+            <input type="number" name="serves_people" class="form-input" placeholder="e.g. 75" min="1">
+            <span class="form-hint">Tip: 1 kg rice ≈ 5 servings</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section-block">
+        <h3 class="form-section-label">⏰ Timing</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Cooked / Prepared On</label>
+            <input type="datetime-local" name="cooked_at" class="form-input">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Food Safe Until (Expiry) *</label>
+            <input type="datetime-local" name="expiry_time" class="form-input" required>
+            <span class="form-hint">Set a realistic time — food safety matters</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section-block">
+        <h3 class="form-section-label">📍 Pickup Details</h3>
+        <div class="form-group">
+          <label class="form-label">Pickup Address *</label>
+          <input type="text" name="pickup_address" class="form-input" placeholder="Full address where NGO can collect food" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Contact Number for Pickup *</label>
+          <input type="tel" name="contact" class="form-input" placeholder="Phone number at pickup location" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Special Instructions</label>
+          <textarea name="instructions" class="form-input form-textarea" placeholder="Any handling notes, packaging details, or directions to find the pickup point..."></textarea>
+        </div>
+      </div>
+
+      <div class="form-submit-row">
+        <a href="{{ url_for('donor_dashboard') }}" class="btn btn-outline">Cancel</a>
+        <button type="submit" class="btn btn-primary btn-lg">📢 Post Donation</button>
+      </div>
+
+    </form>
+  </div>
+</section>
+{% endblock %}

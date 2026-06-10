@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% block title %}NGO Dashboard – FoodConnect{% endblock %}
+{% block content %}
+<section class="dashboard-section">
+  <div class="dashboard-container">
+
+    <div class="dashboard-header">
+      <div>
+        <h1 class="dashboard-title">{{ user.org_name or user.name }} 👋</h1>
+        <p class="dashboard-sub">
+          NGO Account ·
+          {% if user.is_verified %}
+            <span class="verified-badge">✅ Verified</span>
+          {% else %}
+            <span class="pending-badge">⏳ Pending Verification</span>
+          {% endif %}
+        </p>
+      </div>
+    </div>
+
+    {% if not user.is_verified %}
+    <div class="alert-banner alert-warning">
+      <span>⚠️</span>
+      <div>
+        <strong>Account pending verification.</strong> Our admin team is reviewing your NGO registration. Once verified, you can request food donations. This usually takes 24–48 hours.
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- STATS -->
+    <div class="stats-grid">
+      <div class="stat-card stat-green">
+        <div class="stat-card-num">{{ stats.available }}</div>
+        <div class="stat-card-label">Available Now</div>
+      </div>
+      <div class="stat-card stat-orange">
+        <div class="stat-card-num">{{ stats.pending }}</div>
+        <div class="stat-card-label">My Pending Requests</div>
+      </div>
+      <div class="stat-card stat-blue">
+        <div class="stat-card-num">{{ stats.accepted }}</div>
+        <div class="stat-card-label">Accepted Pickups</div>
+      </div>
+      <div class="stat-card stat-teal">
+        <div class="stat-card-num">{{ stats.completed }}</div>
+        <div class="stat-card-label">Completed</div>
+      </div>
+    </div>
+
+    <!-- AVAILABLE FOOD -->
+    <div class="dashboard-block">
+      <h2 class="block-title">🟢 Available Food Donations</h2>
+      {% if available %}
+      <div class="food-cards-grid">
+        {% for d in available %}
+        <div class="ngo-food-card">
+          <div class="ngo-food-top">
+            <span class="food-type-badge {{ 'veg' if d.food_type == 'veg' else 'nonveg' }}">
+              {{ '🟢 Veg' if d.food_type == 'veg' else '🔴 Non-Veg' }}
+            </span>
+            <span class="expiry-timer" data-expiry="{{ d.expiry_time.isoformat() }}">
+              ⏱ <span class="timer-text">Loading…</span>
+            </span>
+          </div>
+
+          <h3 class="ngo-food-name">{{ d.food_name }}</h3>
+          <div class="ngo-food-meta">
+            <span>📦 {{ d.quantity }}</span>
+            <span>👥 Feeds {{ d.serves_people }}</span>
+          </div>
+          <div class="ngo-food-addr">📍 {{ d.pickup_address }}</div>
+          <div class="ngo-food-contact">📞 {{ d.contact }}</div>
+          {% if d.instructions %}<div class="ngo-food-note">💬 {{ d.instructions }}</div>{% endif %}
+          <div class="ngo-food-donor">Listed by: <strong>{{ d.donor.org_name or d.donor.name }}</strong></div>
+
+          {% if user.is_verified %}
+          <form method="POST" action="{{ url_for('request_food', don_id=d.id) }}" class="request-form">
+            <textarea name="message" class="form-input form-textarea-sm" placeholder="Optional message to donor (e.g. 'We serve 80 children at our shelter')"></textarea>
+            <button type="submit" class="btn btn-primary btn-full">📩 Request Pickup</button>
+          </form>
+          {% else %}
+          <div class="unverified-note">Verify your account to request this food</div>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state">
+        <div class="empty-icon">🔍</div>
+        <p>No food available right now. Check back soon!</p>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- MY REQUESTS -->
+    <div class="dashboard-block">
+      <h2 class="block-title">📋 My Requests</h2>
+      {% if my_requests %}
+      <div class="requests-list">
+        {% for req in my_requests %}
+        <div class="request-card status-{{ req.status }}">
+          <div class="request-info">
+            <div class="request-food"><strong>{{ req.donation.food_name }}</strong> — {{ req.donation.quantity }}</div>
+            <div class="request-addr">📍 {{ req.donation.pickup_address }}</div>
+            <div class="request-donor">Donor: {{ req.donation.donor.org_name or req.donation.donor.name }} · 📞 {{ req.donation.contact }}</div>
+            <div class="request-date">Requested: {{ req.requested_at.strftime('%d %b %Y, %I:%M %p') }}</div>
+          </div>
+          <div class="request-status-col">
+            <span class="status-badge status-{{ req.status }}">{{ req.status|title }}</span>
+            {% if req.status == 'accepted' %}
+            <div class="pickup-note">🚐 Go pick up now!</div>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state">
+        <p>You haven't made any requests yet.</p>
+      </div>
+      {% endif %}
+    </div>
+
+  </div>
+</section>
+{% endblock %}
